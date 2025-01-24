@@ -8,10 +8,10 @@ exports.userAuth = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.USER_JWT_SECRET); // Use the correct secret here
+    const decoded = jwt.verify(token, process.env.USER_JWT_SECRET);
     req.user = decoded; 
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Invalid token please re-login" });
   }
 };
