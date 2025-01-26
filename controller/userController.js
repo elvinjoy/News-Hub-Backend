@@ -2,6 +2,17 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 const User = require("../model/userModel");
+const Blog = require("../model/blogModel");
+const ImageKit = require("imagekit");
+
+// ImageKit instance for generating authentication parameters
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
+});
+
+// user signup
 
 exports.register = async (req, res) => {
   const { email, name, password } = req.body;
@@ -34,6 +45,8 @@ exports.register = async (req, res) => {
   }
 };
 
+// user login
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -56,10 +69,24 @@ exports.login = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      // user: { name: user.name, email: user.email }, 
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error during login" });
+  }
+};
+
+// add blog by user
+
+exports.addBlog = async (req, res) => {
+  try {
+    const { title, content, topic, visibility, imageUrl, userId, userName } = req.body;
+    const newBlog = new Blog({ title, content, topic, visibility, imageUrl, userId, userName });
+    await newBlog.save();
+
+    res.status(201).json({ message: "Blog saved successfully", blog: newBlog });
+  } catch (error) {
+    console.error("Error saving blog:", error);
+    res.status(500).json({ error: "Error saving blog" });
   }
 };
