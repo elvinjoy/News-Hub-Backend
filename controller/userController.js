@@ -90,3 +90,20 @@ exports.addBlog = async (req, res) => {
     res.status(500).json({ error: "Error saving blog" });
   }
 };
+
+// display all the blogs inside the database
+
+exports.allBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find();
+    
+    if (blogs.length === 0) {
+      return res.status(404).json({ message: "No blogs found" });
+    }
+
+    res.status(200).json({ message: "All blogs fetched successfully", blogs });
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ message: "Error fetching blogs" });
+  }
+};
