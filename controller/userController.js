@@ -3,14 +3,6 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 const User = require("../model/userModel");
 const Blog = require("../model/blogModel");
-const ImageKit = require("imagekit");
-
-// ImageKit instance for generating authentication parameters
-const imagekit = new ImageKit({
-  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
-  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT
-});
 
 // user signup
 
@@ -108,6 +100,7 @@ exports.allBlogs = async (req, res) => {
   }
 };
 
+// displaying a specific blog
 
 exports.specificBlog = async (req, res) => {
   try {
@@ -122,3 +115,79 @@ exports.specificBlog = async (req, res) => {
     res.status(500).json({ message: "Error fetching blog" });
   }
 }
+
+// displaying all the blogs of an specific user
+
+exports.getAllBlogsByUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const blogs = await Blog.find({ userId });
+  
+    if (!blogs || blogs.length === 0) {
+      return res.status(404).json({ message: "No blogs found for this user" });
+    }
+    res.status(200).json({ message: "Blogs fetched successfully", blogs });
+  } catch (error) {
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ message: "Error fetching blogs" });
+  }
+};
+
+
+// edit an specific blog
+
+exports.editBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const { title, content, topic, visibility, imageUrl } = req.body;
+
+    // Validate input
+    if (!title || !content || !topic) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const updatedBlogData = {
+      title,
+      content,
+      topic,
+      visibility,
+      imageUrl
+    };
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      blogId, 
+      updatedBlogData, 
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    res.status(200).json({  
+      message: "Blog updated successfully", 
+      blog: updatedBlog,
+      userId: updatedBlog.userId 
+    });
+  } catch (error) {
+    console.error("Error updating blog:", error);
+    res.status(500).json({ message: "Error updating blog", error: error.message });
+  }
+};
+
+// delete an specific blog
+
+exports.deleteBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const deletedBlog = await Blog.findByIdAndDelete(blogId);
+    if (!deletedBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+    res.status(200).json({ message: "Blog deleted successfully", blog: deletedBlog });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    res.status(500).json({ message: "Error deleting blog" });
+  }
+}
+
