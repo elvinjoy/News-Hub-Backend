@@ -141,7 +141,7 @@ exports.deleteBlog = async (req, res) => {
 // find the blogs with the keyword
 
 exports.findByWord = async (req, res) => {
-  const { keyword } = req.params;  // Use req.params instead of req.query
+  const { keyword } = req.params; // Use req.params instead of req.query
 
   if (!keyword) {
     return res.status(400).json({ message: "Keyword is required for search." });
@@ -159,7 +159,34 @@ exports.findByWord = async (req, res) => {
     res.status(200).json({ blogs });
   } catch (error) {
     console.error("Error finding blogs:", error);
-    res.status(500).json({ message: "An error occurred while searching for blogs." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while searching for blogs." });
   }
 };
 
+// get all the public blogs with pageination
+
+exports.getBlogs = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 9;
+    const skip = (page - 1) * limit;
+
+    // Only fetch blogs with visibility set to 'public'
+    const blogs = await Blog.find({ visibility: 'public' })
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalBlogs = await Blog.countDocuments({ visibility: 'public' });
+
+    res.status(200).json({
+      blogs,
+      totalPages: Math.ceil(totalBlogs / limit),
+      currentPage: page,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching blogs", error });
+  }
+};

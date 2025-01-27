@@ -10,5 +10,6 @@ router.get("/allblogsbyuser/:id", blogController.getAllBlogsByUser);
 router.put("/editblog/:id", userAuth.userAuth, blogController.editBlog);
 router.delete("/deleteblog/:id", userAuth.userAuth, blogController.deleteBlog);
 router.get('/search/:keyword', blogController.findByWord);
+router.get("/blogs", blogController.getBlogs);
 
 module.exports = router;
