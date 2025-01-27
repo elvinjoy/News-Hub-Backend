@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const userRouter = require("./router/userRouter");
+const blogRouter = require("./router/blogRouter");
 const cors = require("cors");
 require("dotenv").config(); 
 
@@ -11,6 +12,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 app.use("/api/users", userRouter);
+app.use("/api/blog", blogRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI, {
